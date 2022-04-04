@@ -108,10 +108,15 @@ class JsonDatasetWriter:
             key=slice(offset, offset + self.batch_size),
             indices=self.dataset._indices,
         )
-        json_str = batch.to_pandas().to_json(path_or_buf=None, orient=orient, lines=lines, **to_json_kwargs)
+        tmp_df = batch.to_pandas()
+        del batch
+        json_str = tmp_df.to_json(path_or_buf=None, orient=orient, lines=lines, **to_json_kwargs)
+        del tmp_df
         if not json_str.endswith("\n"):
             json_str += "\n"
-        return json_str.encode(self.encoding)
+        encoded_json_str = json_str.encode(self.encoding)
+        del json_str
+        return encoded_json_str
 
     def _write(
         self,
